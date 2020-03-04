@@ -21,7 +21,7 @@ namespace TomsTcpTester
             var stream = _client.GetStream();
             while (_client.Connected)
             {
-                var size = r.Next(1024, 2048);
+                var size = r.Next(1, 64 * 1024);
                 var seed = r.Next();
 
                 var header = new byte[8];
