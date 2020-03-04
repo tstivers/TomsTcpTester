@@ -54,7 +54,7 @@ namespace TomsTcpTester
 
             if (!expectedPayload.SequenceEqual(payload))
             {
-                var message = $"\n\n\n{DateTime.Now:G}{ClientAddress} validation failed:\n";
+                var message = $"\n\n\n{DateTime.Now:G}\n{ClientAddress} validation failed:\n";
                 //message += $"expected {string.Join(" ", expectedPayload.Select(x => x.ToString("x2")))}\n\n";
                 //message += $"received {string.Join(" ", payload.Select(x => x.ToString("x2")))}\n\n";
                 int i;
@@ -66,6 +66,8 @@ namespace TomsTcpTester
                     if (payload[i] != expectedPayload[i])
                     {
                         message += $"[{i}] expected {expectedPayload[i]:x2} received {payload[i]:x2}\n";
+                        message += $"expected: {Convert.ToString(expectedPayload[i], 2).PadLeft(8, '0')}\n";
+                        message += $"received: {Convert.ToString(payload[i], 2).PadLeft(8, '0')}\n";
                         count++;
                         if (firstOffset == 0)
                             firstOffset = i;
