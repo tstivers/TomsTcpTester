@@ -55,30 +55,23 @@ namespace TomsTcpTester
             if (!expectedPayload.SequenceEqual(payload))
             {
                 var message = $"\n\n\n{DateTime.Now:G}\n{ClientAddress} validation failed:\n";
-                //message += $"expected {string.Join(" ", expectedPayload.Select(x => x.ToString("x2")))}\n\n";
-                //message += $"received {string.Join(" ", payload.Select(x => x.ToString("x2")))}\n\n";
-                int i;
-                int firstOffset = 0;
-                var count = 0;
 
-                for (i = 0; i < payload.Length; i++)
+                var count = 0;
+                for (var i = 0; i < payload.Length; i++)
                 {
                     if (payload[i] != expectedPayload[i])
                     {
                         message += $"[{i}] expected {expectedPayload[i]:x2} received {payload[i]:x2}\n";
                         message += $"expected: {Convert.ToString(expectedPayload[i], 2).PadLeft(8, '0')}\n";
-                        message += $"received: {Convert.ToString(payload[i], 2).PadLeft(8, '0')}\n";
+                        message += $"received: {Convert.ToString(payload[i], 2).PadLeft(8, '0')}\n\n";
                         count++;
-                        if (firstOffset == 0)
-                            firstOffset = i;
                     }
                 }
 
-                message += $"\npayload length = {payload.Length}\n";
+                message += $"payload length = {payload.Length}\n";
                 message += $"mismatch count = {count}\n";
 
                 Console.WriteLine(message);
-                //throw new Exception(message);
             }
 
             //Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
