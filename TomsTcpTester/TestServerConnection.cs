@@ -26,13 +26,20 @@ namespace TomsTcpTester
             {
                 // read packet from client
                 var header = new byte[8];
-                stream.Read(header, 0, header.Length);
+                var read = stream.Read(header, 0, header.Length);
+                if (read != 8)
+                    throw new Exception("could not read entire header");
 
                 var size = BitConverter.ToUInt32(header, 0);
                 var seed = BitConverter.ToInt32(header, 4);
 
                 var payload = new byte[size];
-                stream.Read(payload, 0, payload.Length);
+                read = 0;
+
+                while (read != size)
+                {
+                    read += stream.Read(payload, read, payload.Length - read);
+                }
 
                 // validate payload
                 ValidatePayload(seed, payload);
@@ -46,7 +53,17 @@ namespace TomsTcpTester
             r.NextBytes(expectedPayload);
 
             if (!expectedPayload.SequenceEqual(payload))
-                throw new Exception($"{ClientAddress} validation failed:\nexpected {string.Join(" ", expectedPayload.Select(x => x.ToString("x")))}\nreceived {string.Join(" ", payload.Select(x => x.ToString("x")))}");
+            {
+                var message = $"{ClientAddress} validation failed:\n";
+                message += $"expected {string.Join(" ", expectedPayload.Select(x => x.ToString("x")))}\n\n";
+                message += $"expected {string.Join(" ", payload.Select(x => x.ToString("x")))}\n\n";
+                int i;
+                for (i = payload.Length - 1; payload[i] == 0; i--) ;
+
+                message += $"truncation occurred at byte {i}";
+
+                throw new Exception(message);
+            }
 
             Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
         }
