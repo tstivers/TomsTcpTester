@@ -54,18 +54,32 @@ namespace TomsTcpTester
 
             if (!expectedPayload.SequenceEqual(payload))
             {
-                var message = $"{ClientAddress} validation failed:\n";
-                message += $"expected {string.Join(" ", expectedPayload.Select(x => x.ToString("x")))}\n\n";
-                message += $"expected {string.Join(" ", payload.Select(x => x.ToString("x")))}\n\n";
+                var message = $"\n\n\n{DateTime.Now:G}{ClientAddress} validation failed:\n";
+                //message += $"expected {string.Join(" ", expectedPayload.Select(x => x.ToString("x2")))}\n\n";
+                //message += $"received {string.Join(" ", payload.Select(x => x.ToString("x2")))}\n\n";
                 int i;
-                for (i = payload.Length - 1; payload[i] == 0; i--) ;
+                int firstOffset = 0;
+                var count = 0;
 
-                message += $"truncation occurred at byte {i}";
+                for (i = 0; i < payload.Length; i++)
+                {
+                    if (payload[i] != expectedPayload[i])
+                    {
+                        message += $"[{i}] expected {expectedPayload[i]:x2} received {payload[i]:x2}\n";
+                        count++;
+                        if (firstOffset == 0)
+                            firstOffset = i;
+                    }
+                }
 
-                throw new Exception(message);
+                message += $"\npayload length = {payload.Length}\n";
+                message += $"mismatch count = {count}\n";
+
+                Console.WriteLine(message);
+                //throw new Exception(message);
             }
 
-            Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
+            //Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
         }
     }
 }
