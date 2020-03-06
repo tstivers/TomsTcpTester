@@ -7,11 +7,17 @@ namespace TomsTcpTester
     public class TestClient
     {
         private readonly TcpClient _client;
+        private readonly ClientOptions _options;
 
-        public TestClient(string serverIp, int port)
+        public TestClient(ClientOptions options)
         {
+            _options = options;
             _client = new TcpClient();
-            _client.Connect(serverIp, port);
+
+            if (_options.DisableNagle)
+                _client.NoDelay = true; // disable nagle
+
+            _client.Connect(_options.Address, _options.Port);
             Console.WriteLine($"Connected to {_client.Client.RemoteEndPoint}");
         }
 
@@ -21,7 +27,7 @@ namespace TomsTcpTester
             var stream = _client.GetStream();
             while (_client.Connected)
             {
-                var size = r.Next(1, 64 * 1024);
+                var size = r.Next(_options.MinPacketSize, _options.MaxPacketSize);
                 var seed = r.Next();
 
                 var header = new byte[8];
@@ -34,7 +40,7 @@ namespace TomsTcpTester
                 pr.NextBytes(payload);
                 stream.Write(payload);
                 Console.WriteLine($"Sent payload {{size = {size}}}");
-                Thread.Sleep(100);
+                Thread.Sleep(_options.Delay);
             }
 
             Console.WriteLine("Server disconnected");

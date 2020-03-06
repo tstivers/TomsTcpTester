@@ -7,10 +7,13 @@ namespace TomsTcpTester
     public class TestServerConnection
     {
         private readonly TcpClient _client;
+        private readonly ServerOptions _options;
 
-        public TestServerConnection(TcpClient client)
+        public TestServerConnection(TcpClient client, ServerOptions options)
         {
             _client = client;
+            _options = options;
+            Console.WriteLine($"Connection established with {ClientAddress}");
         }
 
         private string ClientAddress
@@ -54,7 +57,7 @@ namespace TomsTcpTester
 
             if (!expectedPayload.SequenceEqual(payload))
             {
-                var message = $"\n\n\n{DateTime.Now:G}\n{ClientAddress} validation failed:\n";
+                var message = $"{DateTime.Now:G}\n{ClientAddress} validation failed:\n";
 
                 var count = 0;
                 for (var i = 0; i < payload.Length; i++)
@@ -63,18 +66,19 @@ namespace TomsTcpTester
                     {
                         message += $"[{i}] expected {expectedPayload[i]:x2} received {payload[i]:x2}\n";
                         message += $"expected: {Convert.ToString(expectedPayload[i], 2).PadLeft(8, '0')}\n";
-                        message += $"received: {Convert.ToString(payload[i], 2).PadLeft(8, '0')}\n\n";
+                        message += $"received: {Convert.ToString(payload[i], 2).PadLeft(8, '0')}\n";
                         count++;
                     }
                 }
 
                 message += $"payload length = {payload.Length}\n";
-                message += $"mismatch count = {count}\n";
+                message += $"mismatch count = {count}\n\n";
 
                 Console.WriteLine(message);
             }
 
-            //Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
+            if (_options.Verbose)
+                Console.WriteLine($"{ClientAddress} received valid payload [{payload.Length}]");
         }
     }
 }

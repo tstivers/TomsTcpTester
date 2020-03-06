@@ -8,22 +8,22 @@ namespace TomsTcpTester
     public class TestServer
     {
         private readonly TcpListener _server;
+        private readonly ServerOptions _options;
 
-        public TestServer(string ip, int port)
+        public TestServer(ServerOptions options)
         {
-            _server = new TcpListener(IPAddress.Parse(ip), port);
+            _options = options;
+            _server = new TcpListener(_options.Address == "*" ? IPAddress.Any : IPAddress.Parse(_options.Address), _options.Port);
         }
 
         public void Run()
         {
             _server.Start();
-
+            Console.WriteLine("Waiting for connections...");
             while (true)
             {
-                Console.WriteLine("Waiting for a connection...");
                 var client = _server.AcceptTcpClient();
-                Console.WriteLine("Connected!");
-                var c = new TestServerConnection(client);
+                var c = new TestServerConnection(client, _options);
                 var t = new Thread(c.Run);
                 t.Start();
             }
